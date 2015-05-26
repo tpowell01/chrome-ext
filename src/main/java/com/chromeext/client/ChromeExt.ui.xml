@@ -1,0 +1,22 @@
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+             xmlns:gwt="urn:import:com.google.gwt.user.client.ui">
+    <gwt:DialogBox modal="false" autoHide="false">
+        <gwt:caption>Chrome Extension</gwt:caption>
+        <gwt:VerticalPanel width="300px">
+            <gwt:FlowPanel styleName="state-panel">
+                <gwt:Label ui:field="lblState">[State]</gwt:Label>
+            </gwt:FlowPanel>
+            <gwt:FlowPanel styleName="form-panel">
+                <gwt:Label>[Form]</gwt:Label>
+            </gwt:FlowPanel>
+            <gwt:FlowPanel styleName="context-panel">
+                <gwt:Label>[Context]</gwt:Label>
+            </gwt:FlowPanel>
+            <gwt:FlowPanel>
+                <gwt:Button ui:field="btnClear">[Clear]</gwt:Button>
+                <gwt:Button ui:field="btnReplay">[Replay]</gwt:Button>
+                <gwt:Button ui:field="btnSave">[Save]</gwt:Button>
+            </gwt:FlowPanel>
+        </gwt:VerticalPanel>
+    </gwt:DialogBox>
+</ui:UiBinder>

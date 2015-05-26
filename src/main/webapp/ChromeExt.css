@@ -1,0 +1,16 @@
+
+.state-panel, .form-panel, .context-panel {
+    border-bottom: 2px solid gray;
+}
+
+.state-panel {
+    height: 50px;
+}
+
+.form-panel {
+    height: 200px;
+}
+
+.context-panel {
+    height: 200px;
+}
