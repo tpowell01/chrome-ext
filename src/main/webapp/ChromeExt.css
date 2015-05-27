@@ -14,3 +14,15 @@
 .context-panel {
     height: 200px;
 }
+
+.chromeext-caption {
+    width: 100%;
+}
+
+.chromeext-title {
+
+}
+
+.chromeext-close {
+    float: right;
+}
