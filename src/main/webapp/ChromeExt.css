@@ -26,3 +26,7 @@
 .chromeext-close {
     float: right;
 }
+
+.chromeext-outline-red {
+    border: 1px solid red !important;
+}

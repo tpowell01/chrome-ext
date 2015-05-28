@@ -11,6 +11,12 @@ chrome.runtime.onMessage.addListener(function(msg, sender, sendResponse) {
         link.setAttribute("href", gwtCSSURL);
         head.appendChild(link);
 
+        link = document.createElement("link");
+        link.setAttribute("rel", "stylesheet");
+        link.setAttribute("type", "text/css");
+        link.setAttribute("href", chrome.runtime.getURL("chromeext/ChromeExt.css"));
+        head.appendChild(link);
+
         var gwtNocacheURL = chrome.runtime.getURL("chromeext/chromeext.nocache.js");
         var script = document.createElement("script");
         script.type = "text/javascript";

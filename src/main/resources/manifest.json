@@ -16,13 +16,15 @@
         ],
         "persistent": true
     },
-    "options_page": "src/options_custom/index.html",
+    "options_page": "src/options/options.html",
 
     "browser_action": {
         "default_icon": "icons/icon19.png"
     },
+    "content_security_policy": "script-src 'self'; object-src 'self'",
     "permissions": [
         "background",
+        "storage",
         "bookmarks",
         "chrome://favicon/",
         "clipboardRead",
@@ -49,10 +51,10 @@
 
 
     "web_accessible_resources": [
-//        "chromeext/4966463EECF230277889674332D3B073.cache.js",
         "chromeext/chromeext.nocache.js",
         "chromeext/gwt/*",
-        "src/custom/runner.js"
+        "src/custom/runner.js",
+        "chromeext/ChromeExt.css"
     ],
 
 
@@ -72,15 +74,7 @@
             "js": [
                 "src/inject/inject.js"
             ]
-        }/*,
-        {
-            "matches": [
-                "<all_urls>"
-            ],
-            "js": [
-                "chromeext/chromeext.nocache.js"
-            ]
-        }*/
+        }
     ]
 }
 

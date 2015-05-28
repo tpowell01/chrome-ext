@@ -26,9 +26,9 @@
     <source path='client'/>
 
     <!-- allow Super Dev Mode -->
-    <add-linker name="xsiframe"/>
+    <!--<add-linker name="xsiframe"/>-->
     <collapse-all-properties/>
-    <!--<add-linker name="sso"/>-->
+    <add-linker name="sso"/>
     <!--<set-property name="user.agent" value="safari"/>-->
     <!--<add-linker name="direct_install"/>-->
 </module>

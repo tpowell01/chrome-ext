@@ -5,7 +5,7 @@ package com.chromeext.client;
  */
 public enum Mode {
     UNSELECTED("Unselected", "Hover cursor over on webpage"),
-    PRESELECTED("Pre-selected", "Right-click to select ..."),
+    PRESELECTED("Pre-selected", "Right-click to select {0}"),
     SELECTED("Selected", "Complete the form below");
 
     private String name;

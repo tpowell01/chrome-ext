@@ -13,6 +13,24 @@
   </head>
 
   <body>
+    <input type="text" class="inputWithClassName" placeholder="Test input field">
+    <br>
+    <input type="text" id="inputWithID" placeholder="Test input field">
+    <br>
     <input type="text" placeholder="Test input field">
   </body>
+
+<script type="text/javascript">
+    function sinkContextMenu(evt) {
+        evt.stopPropagation();
+        evt.preventDefault();
+        evt.cancelBubble(true);
+    }
+/*
+    document.oncontextmenu = function(evt) {
+        console.log(evt);
+        return false;
+    }
+*/
+</script>
 </html>
