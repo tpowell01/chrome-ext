@@ -25,8 +25,13 @@
 
 .chromeext-close {
     float: right;
+    cursor: pointer;
 }
 
 .chromeext-outline-red {
     border: 1px solid red !important;
+}
+
+.gwt-DialogBox {
+    z-index: 200 !important;
 }

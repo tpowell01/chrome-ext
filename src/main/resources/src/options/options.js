@@ -14,7 +14,6 @@ function initStorageValues() {
             save_options();
         }
         document.preSelectTimeout = items.preSelectTimeout;
-        console.log("initStorageOptions: " + document.preSelectTimeout);
     });
 }
 

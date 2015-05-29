@@ -3,6 +3,7 @@ package com.chromeext.client;
 import com.chromeext.client.events.ChangeModeEvent;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.EventTarget;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Event;
@@ -40,6 +41,7 @@ public class ChromeExt implements EntryPoint {
      * This is the entry point method.
      */
     public void onModuleLoad() {
+
         //setup event bus which used for custom events sending and interception between page and extension popup
         eventBus = new SimpleEventBus();
         //initialize extension popup
@@ -81,13 +83,14 @@ public class ChromeExt implements EntryPoint {
                     }
                 } else if (eventType == Event.ONMOUSEOVER) { //capture element on mouse over. capture only submittable element
                     //catch currently hovered element on page
-                    //todo: add logic to skip extension's popup from being captured
                     if (currentMode.equals(Mode.UNSELECTED)) {
                         EventTarget target = event.getNativeEvent().getEventTarget();
-                        if (isSubmittableElement(target)) {
-                            currentTarget = target;
-                        } else {
+                        Element elm = Element.as(target);
+                        //capture only elements that are not belong to popup itself
+                        if (popup.getElement().isOrHasChild(elm)) {
                             currentTarget = null;
+                        } else {
+                            currentTarget = target;
                         }
                     }
                 }
@@ -95,12 +98,13 @@ public class ChromeExt implements EntryPoint {
         };
 
         //for testing purposes...
-        showExtension(); //todo remove after testing
+//        showExtension(); //todo remove after testing
     }
     /**
      * This method exposed to javascript to open extension's popup on target page
      */
     public static void showExtension() {
+        preSelectTimeout = initPreSelectTimeout();
         popup.show();
         handlerRegistration = Event.addNativePreviewHandler(nativeEventPreviewHandler);
     }
@@ -150,6 +154,7 @@ public class ChromeExt implements EntryPoint {
     }-*/;
 
     //checks if hovered html element is form submittable element or not
+    //todo: perhaps there will be a filtering on particular elements, not all. Perhaps not... So leaving this method for now as is.
     public static native boolean isSubmittableElement(JavaScriptObject obj)/*-{
         var tagName = obj.tagName;
         var result = false;

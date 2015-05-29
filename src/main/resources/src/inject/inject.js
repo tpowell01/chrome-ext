@@ -1,6 +1,18 @@
 
 chrome.runtime.onMessage.addListener(function(msg, sender, sendResponse) {
-    if (msg.text && (msg.text == "load_extension")) {
+    chrome.storage.sync.get("preSelectTimeout", function (items) {
+        if (!items.preSelectTimeout) {
+            items.preSelectTimeout = 1000;
+        }
+
+        var inp = document.createElement("input");
+        inp.type = "hidden";
+        inp.value = items.preSelectTimeout;
+        inp.id = "gwtPreSelectTimeout";
+        document.body.appendChild(inp);
+    });
+
+    if (msg.text && (msg.text == "load_extension") && !document.gwtExtensionLoaded) {
 
         var head = document.getElementsByTagName("head")[0];
 
@@ -24,7 +36,6 @@ chrome.runtime.onMessage.addListener(function(msg, sender, sendResponse) {
         script.onload = function() {
             //show extension popup once script is loaded
             setTimeout(function() {
-                console.log(document.getElementsByTagName("title")[0].innerText);
                 var script2 = document.createElement("script");
                 script2.type = "text/javascript";
                 script2.src = chrome.runtime.getURL("src/custom/runner.js");
@@ -34,22 +45,13 @@ chrome.runtime.onMessage.addListener(function(msg, sender, sendResponse) {
 
         script.src = gwtNocacheURL;
         head.appendChild(script);
-
-
+        document.gwtExtensionLoaded = true;
+    } else {
+        var head = document.getElementsByTagName("head")[0];
+        var script2 = document.createElement("script");
+        script2.type = "text/javascript";
+        script2.src = chrome.runtime.getURL("src/custom/runner.js");
+        head.appendChild(script2);
     }
 });
 
-/*
-chrome.extension.sendMessage({}, function(response) {
-	var readyStateCheckInterval = setInterval(function() {
-	if (document.readyState === "complete") {
-		clearInterval(readyStateCheckInterval);
-
-		// ----------------------------------------------------------
-		// This part of the script triggers when page is done loading
-		console.log("Hello. This message was sent from scripts/inject.js");
-		// ----------------------------------------------------------
-
-	}
-	}, 10);
-});*/
