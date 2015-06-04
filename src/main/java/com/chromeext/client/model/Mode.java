@@ -1,4 +1,4 @@
-package com.chromeext.client;
+package com.chromeext.client.model;
 
 /**
  * @author Andrew Kharchenko

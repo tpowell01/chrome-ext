@@ -7,16 +7,12 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 /**
  * @author Andrew Kharchenko
  */
-public class TestForm extends BaseForm {
+public class UnsupportedElementForm extends BaseForm {
 
-    public TestForm() {
-        Label lbl = new Label("Test Form");
-        Button btn = new Button("Submit");
-
+    public UnsupportedElementForm() {
+        Label lbl = new Label("This element not yet supported");
         VerticalPanel vp = new VerticalPanel();
         vp.add(lbl);
-        vp.add(btn);
-
         setWidget(vp);
     }
 }

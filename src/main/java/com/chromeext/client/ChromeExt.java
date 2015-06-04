@@ -1,7 +1,11 @@
 package com.chromeext.client;
 
 import com.chromeext.client.events.ChangeModeEvent;
+import com.chromeext.client.model.Mode;
+import com.chromeext.client.model.TargetModel;
+import com.chromeext.client.model.TargetType;
 import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.EventTarget;
@@ -61,7 +65,8 @@ public class ChromeExt implements EntryPoint {
                 //2. add red border around pre-selected target element
                 if (currentTarget != null) {
                     currentMode = Mode.PRESELECTED;
-                    eventBus.fireEvent(new ChangeModeEvent(currentMode, currentTarget));
+                    TargetType tt = TargetType.getByType(getTargetType(currentTarget));
+                    eventBus.fireEvent(new ChangeModeEvent(currentMode, new TargetModel(currentTarget, tt)));
                     sunkOnContextMenuEvent();
                 }
             }
@@ -76,7 +81,8 @@ public class ChromeExt implements EntryPoint {
                 if (eventType == Event.ONMOUSEMOVE) {
                     if (Mode.PRESELECTED.equals(currentMode) || Mode.UNSELECTED.equals(currentMode)) {
                         currentMode = Mode.UNSELECTED;
-                        eventBus.fireEvent(new ChangeModeEvent(currentMode, currentTarget));
+                        eventBus.fireEvent(new ChangeModeEvent(currentMode, new TargetModel(currentTarget,
+                                TargetType.getByType(getTargetType(currentTarget)))));
                         captureTimer.cancel();
                         captureTimer.schedule(preSelectTimeout);
                         restoreOnContextMenuEvent();
@@ -98,13 +104,17 @@ public class ChromeExt implements EntryPoint {
         };
 
         //for testing purposes...
-//        showExtension(); //todo remove after testing
+        showExtension(); //todo remove after testing
     }
+
     /**
      * This method exposed to javascript to open extension's popup on target page
      */
     public static void showExtension() {
-        preSelectTimeout = initPreSelectTimeout();
+        int timeout = initPreSelectTimeout();
+        if (timeout > 0) {
+            preSelectTimeout = timeout;
+        }
         popup.show();
         handlerRegistration = Event.addNativePreviewHandler(nativeEventPreviewHandler);
     }
@@ -112,10 +122,12 @@ public class ChromeExt implements EntryPoint {
     private static void handleRightClickInPreSelectedMode() {
         if (Mode.SELECTED.equals(currentMode)) {
             currentMode = Mode.PRESELECTED;
-            eventBus.fireEvent(new ChangeModeEvent(currentMode, currentTarget));
+            eventBus.fireEvent(new ChangeModeEvent(currentMode, new TargetModel(currentTarget,
+                    TargetType.getByType(getTargetType(currentTarget)))));
         } else {
             currentMode = Mode.SELECTED;
-            eventBus.fireEvent(new ChangeModeEvent(currentMode, currentTarget));
+            eventBus.fireEvent(new ChangeModeEvent(currentMode, new TargetModel(currentTarget,
+                    TargetType.getByType(getTargetType(currentTarget)))));
         }
     }
 
@@ -124,7 +136,8 @@ public class ChromeExt implements EntryPoint {
      */
     public static void hideExtension() {
         currentMode = Mode.UNSELECTED;
-        eventBus.fireEvent(new ChangeModeEvent(currentMode, currentTarget));
+        eventBus.fireEvent(new ChangeModeEvent(currentMode, new TargetModel(currentTarget,
+                TargetType.getByType(getTargetType(currentTarget)))));
         popup.hide();
         handlerRegistration.removeHandler();
         restoreOnContextMenuEvent();
@@ -135,10 +148,10 @@ public class ChromeExt implements EntryPoint {
      * Exposing needed method to external javascript to manipulate by extension
      */
     public static native void exposeGWTMethods()/*-{
-        $wnd.showChromeExt = function() {
+        $wnd.showChromeExt = function () {
             @com.chromeext.client.ChromeExt::showExtension()();
         };
-        $wnd.hideChromeExt = function() {
+        $wnd.hideChromeExt = function () {
             @com.chromeext.client.ChromeExt::hideExtension()();
         };
     }-*/;
@@ -154,13 +167,17 @@ public class ChromeExt implements EntryPoint {
     }-*/;
 
     //checks if hovered html element is form submittable element or not
-    //todo: perhaps there will be a filtering on particular elements, not all. Perhaps not... So leaving this method for now as is.
-    public static native boolean isSubmittableElement(JavaScriptObject obj)/*-{
-        var tagName = obj.tagName;
-        var result = false;
-        if (tagName) {
-            var lcTagName = tagName.toLowerCase();
-            result = lcTagName == "input" || lcTagName == "textarea" || lcTagName == "button" || lcTagName == "select";
+    public static native int getTargetType(JavaScriptObject obj)/*-{
+        var result = 0;
+        if (obj) {
+            var tagName = obj.tagName;
+            if (tagName) {
+                var lcTagName = tagName.toLowerCase();
+                result = (lcTagName == "input" || lcTagName == "textarea"
+                    || lcTagName == "button" || lcTagName == "select") ? 1 :
+                    ((lcTagName == "div" || lcTagName == "span" || lcTagName == "p") ? 2 : 0);
+
+            }
         }
         return result;
     }-*/;
@@ -168,7 +185,7 @@ public class ChromeExt implements EntryPoint {
 
     public static native void sunkOnContextMenuEvent()/*-{
         $doc.oldOnContextMenu = $doc.oncontextmenu;
-        $doc.oncontextmenu = function(evt) {
+        $doc.oncontextmenu = function (evt) {
             @com.chromeext.client.ChromeExt::handleRightClickInPreSelectedMode()();
             return false;
         };

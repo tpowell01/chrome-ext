@@ -2,20 +2,44 @@
 <html>
 <head>
     <title>Chrome Extension Options</title>
-
     <script src="options.js"></script>
+    <style type="text/css">
+        .section {
+            padding-bottom: 10px;
+        }
+
+        .section .lbl {
+            float: left;
+            width: 250px;
+            font-weight: bold;
+        }
+    </style>
 </head>
 
 <body>
 
-<div>
-    <label>Current timeout for pre-select mode (ms): </label>
-    <label id="currentPreselectTimeout">...</label>
+<div class="section">
+    <div class="lbl">API Host (used for all API calls):</div>
+    <input id="apiHost" type="text">
 </div>
-<div>
-    <label for="preselectTimeout">Please specify the timeout for pre-select mode (ms):</label>
+
+<div class="section">
+    <div class="lbl">API User:</div>
+    <input id="apiUser" type="text">
+</div>
+
+<div class="section">
+    <div class="lbl">API Password</div>
+    <input id="apiPassword" type="password">
+</div>
+
+<div class="section">
+    <div class="lbl">Timeout for pre-select mode (ms):</div>
     <input id="preselectTimeout" type="number">
 </div>
+
 <button id="save">Save</button>
+
+<!--<button id="testRequest">Test Ajax Request</button>-->
 </body>
 </html>

@@ -2,12 +2,24 @@ package com.chromeext.client;
 
 import com.chromeext.client.events.ChangeModeEvent;
 import com.chromeext.client.events.ChangeModeHander;
+import com.chromeext.client.forms.DivForm;
 import com.chromeext.client.forms.EmptyForm;
-import com.chromeext.client.forms.TestForm;
+import com.chromeext.client.forms.InputForm;
+import com.chromeext.client.forms.UnsupportedElementForm;
+import com.chromeext.client.model.Mode;
+import com.chromeext.client.model.TargetModel;
+import com.chromeext.client.model.TargetType;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Node;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.http.client.Request;
+import com.google.gwt.http.client.RequestBuilder;
+import com.google.gwt.http.client.RequestCallback;
+import com.google.gwt.http.client.RequestException;
+import com.google.gwt.http.client.Response;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiFactory;
 import com.google.gwt.uibinder.client.UiField;
@@ -60,33 +72,87 @@ public class ChromeExtPopup extends DialogBox {
         firstChild.appendChild(captionPanel.getElement());
 
         uiBinder.createAndBindUi(this);
+
+        //todo: remove after testing
+        //todo: test XS requests
+        btnSave.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                RequestBuilder rb = new RequestBuilder(RequestBuilder.GET, "http://google.com");
+                rb.setCallback(new RequestCallback() {
+                    @Override
+                    public void onResponseReceived(Request request, Response response) {
+                        GWT.log("SUCCESS: " + response);
+                    }
+
+                    @Override
+                    public void onError(Request request, Throwable exception) {
+                        GWT.log("ERROR: " + exception.getMessage(), exception);
+                    }
+                });
+                try {
+                    Request request = rb.send();
+                } catch (RequestException e) {
+                    GWT.log(e.getMessage(), e);
+                }
+            }
+        });
+
+
     }
 
     private void initEvents() {
         eventBus.addHandler(ChangeModeEvent.TYPE, new ChangeModeHander() {
             @Override
-            public void onModeChanged(Mode mode, JavaScriptObject element) {
+            public void onModeChanged(Mode mode, TargetModel tm) {
+                if (tm == null) {
+                    return;
+                }
+                JavaScriptObject target = tm.getTarget();
+                TargetType tt = tm.getType();
+
                 String stateName = mode.getName();
                 lblState.setText(stateName);
                 String description = mode.getDescription();
                 lblStateDescription.setText(description);
 
-                if (Mode.PRESELECTED.equals(mode) && element != null) {
-                    description = description.replace("{0}", getFormattedElementData(element));
+                //outline with green
+                if (Mode.PRESELECTED.equals(mode) && target != null) {
+                    description = description.replace("{0}", getFormattedElementData(target));
                     lblStateDescription.setText(description);
-                    removeOutlineFromElement(element);
+                    removeOutlineFromElement(target, "chromeext-outline-red");
+                    outlineElement(target, "chromeext-outline-green");
                     resetFormSection();
                 }
 
-                if (Mode.UNSELECTED.equals(mode) && element != null) {
-                    removeOutlineFromElement(element);
+                //remove all outlines
+                if (Mode.UNSELECTED.equals(mode) && target != null) {
+                    removeOutlineFromElement(target, "chromeext-outline-red");
+                    removeOutlineFromElement(target, "chromeext-outline-green");
                     resetFormSection();
                 }
 
-                if (Mode.SELECTED.equals(mode) && element != null) {
-                    outlineElement(element);
-                    fpFormContainer.clear();
-                    fpFormContainer.add(new TestForm());
+                //outline with red
+                if (Mode.SELECTED.equals(mode) && target != null) {
+                    removeOutlineFromElement(target, "chromeext-outline-green");
+                    outlineElement(target, "chromeext-outline-red");
+
+                    if (tt != null) {
+                        fpFormContainer.clear();
+                        switch (tt) {
+                            case UNSUPPORTED:
+                                fpFormContainer.add(new UnsupportedElementForm());
+                                break;
+                            case INPUT:
+                                fpFormContainer.add(new InputForm());
+                                break;
+                            case DIV:
+                                fpFormContainer.add(new DivForm(getInnerHTML(target)));
+                                break;
+                        }
+                    } else {
+                        resetFormSection();
+                    }
                 }
             }
         });
@@ -118,14 +184,14 @@ public class ChromeExtPopup extends DialogBox {
         return nativeEvent.getEventTarget().equals(close.getElement());
     }
 
-    private static native void outlineElement(JavaScriptObject element)/*-{
-        element.className += " chromeext-outline-red";
+    private static native void outlineElement(JavaScriptObject element, String className)/*-{
+        element.className += " " + className;
     }-*/;
 
-    private static native void removeOutlineFromElement(JavaScriptObject element)/*-{
+    private static native void removeOutlineFromElement(JavaScriptObject element, String className)/*-{
         var cn = element.className;
         if (cn) {
-            cn = cn.replace("chromeext-outline-red", '');
+            cn = cn.replace(className, '');
             element.className = cn;
         }
     }-*/;
@@ -137,6 +203,15 @@ public class ChromeExtPopup extends DialogBox {
             result += " #" + element.id;
         } else if (element.className) {
             result += " ." + element.className;
+        }
+        return result;
+    }-*/;
+
+    private static native String getInnerHTML(JavaScriptObject element)/*-{
+        var result = "<empty>";
+        result = element.innerHTML;
+        if (element && element.innerHTML) {
+            result = element.innerHTML;
         }
         return result;
     }-*/;

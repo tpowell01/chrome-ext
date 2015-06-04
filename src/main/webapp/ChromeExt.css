@@ -32,6 +32,10 @@
     border: 1px solid red !important;
 }
 
+.chromeext-outline-green {
+    border: 1px solid green !important;
+}
+
 .gwt-DialogBox {
     z-index: 200 !important;
 }
