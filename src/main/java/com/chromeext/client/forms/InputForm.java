@@ -1,13 +1,17 @@
 package com.chromeext.client.forms;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.uibinder.client.UiBinder;
+import com.google.gwt.uibinder.client.UiFactory;
+import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiTemplate;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
 
 /**
  * Form for section B for input HTML elements (input, textarea, select).
@@ -16,26 +20,23 @@ import com.google.gwt.user.client.ui.VerticalPanel;
  */
 public class InputForm extends BaseForm {
 
-    private ListBox lbInput;
-    private TextBox tbCustomInput;
+    @UiField ListBox lbSelectInput;
+    @UiField TextBox tbCustomInput;
+    @UiField CheckBox cbSubmitForm;
+    @UiField Button btnSave;
+
+    private static InputFormUiBinder uiBinder = GWT.create(InputFormUiBinder.class);
+
+    @UiTemplate("InputForm.ui.xml")
+    interface InputFormUiBinder extends UiBinder<Widget, InputForm> {}
 
     public InputForm() {
-        VerticalPanel vp = new VerticalPanel();
+        uiBinder.createAndBindUi(this);
 
-        Label lblSelectInput = new Label("Select Input");
-        vp.add(lblSelectInput);
-
-        lbInput = new ListBox();
-        lbInput.setMultipleSelect(false);
-        lbInput.addItem("Zipcodes", "0");
-        lbInput.addItem("Increment", "1");
-        lbInput.addItem("Category", "2");
-        lbInput.addItem("Custom", "3");
-
-        lbInput.addChangeHandler(new ChangeHandler() {
+        lbSelectInput.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
-                String selectedValue = lbInput.getSelectedValue();
+                String selectedValue = lbSelectInput.getSelectedValue();
                 boolean enable = "3".equals(selectedValue);
                 tbCustomInput.setEnabled(enable);
                 if (enable) {
@@ -44,21 +45,10 @@ public class InputForm extends BaseForm {
             }
         });
 
-        vp.add(lbInput);
+    }
 
-        Label lblCustomInput = new Label("Custom Input");
-        vp.add(lblCustomInput);
-
-        tbCustomInput = new TextBox();
-        tbCustomInput.setEnabled(false);
-        vp.add(tbCustomInput);
-
-        CheckBox cbSubmitForm = new CheckBox("Submit Form");
-        vp.add(cbSubmitForm);
-
-        Button btnSave = new Button("Save");
-        vp.add(btnSave);
-
-        setWidget(vp);
+    @UiFactory
+    public BaseForm me() {
+        return this;
     }
 }

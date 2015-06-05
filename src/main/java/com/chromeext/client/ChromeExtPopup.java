@@ -75,6 +75,7 @@ public class ChromeExtPopup extends DialogBox {
 
         //todo: remove after testing
         //todo: test XS requests
+
         btnSave.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {

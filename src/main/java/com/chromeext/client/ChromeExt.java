@@ -5,7 +5,6 @@ import com.chromeext.client.model.Mode;
 import com.chromeext.client.model.TargetModel;
 import com.chromeext.client.model.TargetType;
 import com.google.gwt.core.client.EntryPoint;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.EventTarget;
