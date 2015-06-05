@@ -23,7 +23,7 @@
                 <gwt:Label>Custom Input</gwt:Label>
                 <gwt:TextBox enabled="false" ui:field="tbCustomInput"/>
             </gwt:HTMLPanel>
-            <gwt:CheckBox ui:field="cbSubmitForm">Submit Form</gwt:CheckBox>
+            <gwt:CheckBox ui:field="cbSubmitForm" checked="true">Submit Form</gwt:CheckBox>
             <gwt:HorizontalPanel width="100%">
                 <gwt:cell horizontalAlignment="ALIGN_RIGHT">
                     <gwt:Button ui:field="btnSave">Save</gwt:Button>
