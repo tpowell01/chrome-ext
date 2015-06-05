@@ -31,6 +31,7 @@ import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.web.bindery.event.shared.EventBus;
@@ -47,6 +48,8 @@ public class ChromeExtPopup extends DialogBox {
     @UiField Button btnSave;
     @UiField FlowPanel fpFormContainer;
 
+    private Image imgLoader;
+
     HTML title = new HTML("Chrome Extension");
     HTML close = new HTML("[X]");
     HorizontalPanel captionPanel = new HorizontalPanel();
@@ -59,8 +62,14 @@ public class ChromeExtPopup extends DialogBox {
         this.eventBus = eventBus;
         initEvents();
 
+
+        imgLoader = new Image(((ExtImageBundle) GWT.create(ExtImageBundle.class)).getLoadingIcon().getSafeUri());
+        imgLoader.setHeight("15px");
+
         captionPanel.add(title);
+        captionPanel.add(imgLoader);
         captionPanel.add(close);
+
         captionPanel.addStyleName("chromeext-caption");
         title.addStyleName("chromeext-title");
         close.addStyleName("chromeext-close");
@@ -165,7 +174,8 @@ public class ChromeExtPopup extends DialogBox {
     }
 
     @UiTemplate("ChromeExtPopup.ui.xml")
-    interface ChromeExtPopupUiBinder extends UiBinder<Widget, ChromeExtPopup> {}
+    interface ChromeExtPopupUiBinder extends UiBinder<Widget, ChromeExtPopup> {
+    }
 
     @UiFactory
     DialogBox thatsJustMe() {
