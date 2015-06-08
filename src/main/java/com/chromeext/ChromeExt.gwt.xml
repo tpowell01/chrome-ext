@@ -19,6 +19,7 @@
     <!-- Other module inherits                                      -->
     <inherits name="com.google.gwt.uibinder.UiBinder"/>
     <inherits name="com.google.gwt.http.HTTP"/>
+    <inherits name="com.google.gwt.json.JSON"/>
 
     <!-- Specify the app entry point class.                         -->
     <entry-point class='com.chromeext.client.ChromeExt'/>

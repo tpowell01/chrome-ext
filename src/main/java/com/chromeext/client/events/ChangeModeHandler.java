@@ -7,6 +7,6 @@ import com.google.gwt.event.shared.EventHandler;
 /**
  * @author Andrew Kharchenko
  */
-public interface ChangeModeHander extends EventHandler {
+public interface ChangeModeHandler extends EventHandler {
     void onModeChanged(Mode mode, TargetModel target);
 }

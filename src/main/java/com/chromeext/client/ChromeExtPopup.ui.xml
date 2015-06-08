@@ -10,8 +10,8 @@
             <gwt:FlowPanel styleName="form-panel" ui:field="fpFormContainer">
                 <ce:EmptyForm/>
             </gwt:FlowPanel>
-            <gwt:FlowPanel styleName="context-panel">
-                <gwt:Label>[Context]</gwt:Label>
+            <gwt:FlowPanel styleName="context-panel" ui:field="fpContextContainer">
+                <ce:EmptyForm/>
             </gwt:FlowPanel>
             <gwt:FlowPanel>
                 <gwt:Button ui:field="btnClear">[Clear]</gwt:Button>

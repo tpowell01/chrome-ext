@@ -1,0 +1,20 @@
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+             xmlns:gwt="urn:import:com.google.gwt.user.client.ui"
+             xmlns:ce="urn:import:com.chromeext.client.forms">
+    <ui:style>
+        .cef-error {
+            color: #FF0000;
+        }
+
+        .cef-title {
+            font-weight: bold;
+        }
+    </ui:style>
+
+    <ce:BaseForm>
+        <gwt:VerticalPanel width="100%">
+            <gwt:Label styleName="{style.cef-error} {style.cef-title}">Error while calling remote API</gwt:Label>
+            <gwt:Label styleName="{style.cef-error}" ui:field="lblErrorText"/>
+        </gwt:VerticalPanel>
+    </ce:BaseForm>
+</ui:UiBinder>

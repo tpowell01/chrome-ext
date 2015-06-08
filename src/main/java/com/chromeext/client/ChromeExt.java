@@ -4,11 +4,16 @@ import com.chromeext.client.events.ChangeModeEvent;
 import com.chromeext.client.model.Mode;
 import com.chromeext.client.model.TargetModel;
 import com.chromeext.client.model.TargetType;
+import com.chromeext.client.request.Communicator;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.EventTarget;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.json.client.JSONNumber;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.json.client.JSONString;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Timer;
 import com.google.web.bindery.event.shared.EventBus;
@@ -38,7 +43,11 @@ public class ChromeExt implements EntryPoint {
 
     private static EventBus eventBus;
 
-    private static int preSelectTimeout = 1000; //todo: make it somehow retrieved from chrome's options
+    private static int preSelectTimeout = 1000;
+
+    private static String apiHost;
+    private static String apiUser;
+    private static String apiPassword;
 
     /**
      * This is the entry point method.
@@ -110,11 +119,14 @@ public class ChromeExt implements EntryPoint {
      * This method exposed to javascript to open extension's popup on target page
      */
     public static void showExtension() {
-        int timeout = initPreSelectTimeout();
-        if (timeout > 0) {
-            preSelectTimeout = timeout;
-        }
+        //invoke extension configuration based on extension options set
+        setupConfiguration();
+
+        //setup communicator for further API calls invocations and processing
+        Communicator.setupEnvironment(eventBus, apiHost, apiUser, apiPassword);
+
         popup.show();
+
         handlerRegistration = Event.addNativePreviewHandler(nativeEventPreviewHandler);
     }
 
@@ -155,16 +167,6 @@ public class ChromeExt implements EntryPoint {
         };
     }-*/;
 
-    //log1
-    public static native void log(JavaScriptObject obj)/*-{
-        console.log(obj.tagName);
-    }-*/;
-
-    //log2
-    public static native void logString(String log)/*-{
-        console.log(log);
-    }-*/;
-
     //checks if hovered html element is form submittable element or not
     public static native int getTargetType(JavaScriptObject obj)/*-{
         var result = 0;
@@ -194,7 +196,27 @@ public class ChromeExt implements EntryPoint {
         $doc.oncontextmenu = $doc.oldOnContextMenu;
     }-*/;
 
-    public static native int initPreSelectTimeout()/*-{
-        return $doc.preSelectTimeout;
+    public static native String getChromeExtConfiguration()/*-{
+        return $doc.chromeExtOptions;
     }-*/;
+
+
+    /**
+     * Setup initial extension's configuration
+     */
+    private static void setupConfiguration() {
+        String cfg = getChromeExtConfiguration();
+        JSONObject config = JSONParser.parseLenient(cfg).isObject();
+        JSONNumber pst = config.get("preSelectTimeout").isNumber();
+        int timeout = Double.valueOf(pst.doubleValue()).intValue();
+        if (timeout > 0) {
+            preSelectTimeout = timeout;
+        }
+        JSONString jsonApiHost = config.get("apiHost").isString();
+        apiHost = jsonApiHost.stringValue();
+        JSONString jsonApiUser = config.get("apiUser").isString();
+        apiUser = jsonApiUser.stringValue();
+        JSONString jsonApiPassword = config.get("apiPassword").isString();
+        apiPassword = jsonApiPassword.stringValue();
+    }
 }

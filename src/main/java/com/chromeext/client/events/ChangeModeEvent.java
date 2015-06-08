@@ -7,9 +7,9 @@ import com.google.web.bindery.event.shared.Event;
 /**
  * @author Andrew Kharchenko
  */
-public class ChangeModeEvent extends Event {
+public class ChangeModeEvent extends Event<ChangeModeHandler> {
 
-    public static Type TYPE = new Type<ChangeModeEvent>();
+    public static Type<ChangeModeHandler> TYPE = new Type<>();
 
     private Mode mode;
     private TargetModel target;
@@ -20,12 +20,13 @@ public class ChangeModeEvent extends Event {
     }
 
     @Override
-    public Type getAssociatedType() {
+    public Type<ChangeModeHandler> getAssociatedType() {
         return TYPE;
     }
 
     @Override
-    protected void dispatch(Object handler) {
-        ((ChangeModeHander)handler).onModeChanged(mode, target);
+    protected void dispatch(ChangeModeHandler handler) {
+        handler.onModeChanged(mode, target);
     }
+
 }

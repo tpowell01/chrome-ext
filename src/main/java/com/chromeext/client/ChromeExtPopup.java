@@ -1,25 +1,27 @@
 package com.chromeext.client;
 
+import com.chromeext.client.events.APICallEvent;
+import com.chromeext.client.events.APICallHandler;
 import com.chromeext.client.events.ChangeModeEvent;
-import com.chromeext.client.events.ChangeModeHander;
+import com.chromeext.client.events.ChangeModeHandler;
+import com.chromeext.client.forms.ContextErrorForm;
+import com.chromeext.client.forms.ContextStateForm;
 import com.chromeext.client.forms.DivForm;
 import com.chromeext.client.forms.EmptyForm;
 import com.chromeext.client.forms.InputForm;
 import com.chromeext.client.forms.UnsupportedElementForm;
+import com.chromeext.client.model.CallResult;
 import com.chromeext.client.model.Mode;
 import com.chromeext.client.model.TargetModel;
 import com.chromeext.client.model.TargetType;
+import com.chromeext.client.request.Communicator;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Node;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.http.client.Request;
-import com.google.gwt.http.client.RequestBuilder;
-import com.google.gwt.http.client.RequestCallback;
-import com.google.gwt.http.client.RequestException;
-import com.google.gwt.http.client.Response;
+import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiFactory;
 import com.google.gwt.uibinder.client.UiField;
@@ -47,6 +49,7 @@ public class ChromeExtPopup extends DialogBox {
     @UiField Button btnReplay;
     @UiField Button btnSave;
     @UiField FlowPanel fpFormContainer;
+    @UiField FlowPanel fpContextContainer;
 
     private Image imgLoader;
 
@@ -80,6 +83,19 @@ public class ChromeExtPopup extends DialogBox {
         Node firstChild = captionHolder.getFirstChild();
         firstChild.appendChild(captionPanel.getElement());
 
+        //subscribe for API call events and handle them here
+        this.eventBus.addHandler(APICallEvent.TYPE, new APICallHandler() {
+            @Override
+            public void onAPICall(CallResult result) {
+                fpContextContainer.clear();
+                if (result.isError()) {
+                    fpContextContainer.add(new ContextErrorForm(result.getResponse()));
+                } else {
+                    fpContextContainer.add(new ContextStateForm(JSONParser.parseStrict(result.getResponse()).isObject()));
+                }
+            }
+        });
+
         uiBinder.createAndBindUi(this);
 
         //todo: remove after testing
@@ -88,23 +104,7 @@ public class ChromeExtPopup extends DialogBox {
         btnSave.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                RequestBuilder rb = new RequestBuilder(RequestBuilder.GET, "http://google.com");
-                rb.setCallback(new RequestCallback() {
-                    @Override
-                    public void onResponseReceived(Request request, Response response) {
-                        GWT.log("SUCCESS: " + response);
-                    }
-
-                    @Override
-                    public void onError(Request request, Throwable exception) {
-                        GWT.log("ERROR: " + exception.getMessage(), exception);
-                    }
-                });
-                try {
-                    Request request = rb.send();
-                } catch (RequestException e) {
-                    GWT.log(e.getMessage(), e);
-                }
+                Communicator.getState();
             }
         });
 
@@ -112,7 +112,7 @@ public class ChromeExtPopup extends DialogBox {
     }
 
     private void initEvents() {
-        eventBus.addHandler(ChangeModeEvent.TYPE, new ChangeModeHander() {
+        eventBus.addHandler(ChangeModeEvent.TYPE, new ChangeModeHandler() {
             @Override
             public void onModeChanged(Mode mode, TargetModel tm) {
                 if (tm == null) {

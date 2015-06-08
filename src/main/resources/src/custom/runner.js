@@ -1,5 +1,5 @@
 
 var inp = document.getElementById("gwtPreSelectTimeout");
-document.preSelectTimeout = inp.value;
+document.chromeExtOptions = inp.value;
 window.showChromeExt();
 
