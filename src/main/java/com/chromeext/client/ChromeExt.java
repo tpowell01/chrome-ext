@@ -128,6 +128,10 @@ public class ChromeExt implements EntryPoint {
         popup.show();
 
         handlerRegistration = Event.addNativePreviewHandler(nativeEventPreviewHandler);
+
+        //perform API server ping
+        Communicator.pingAPIServer();
+
     }
 
     private static void handleRightClickInPreSelectedMode() {
@@ -207,8 +211,8 @@ public class ChromeExt implements EntryPoint {
     private static void setupConfiguration() {
         String cfg = getChromeExtConfiguration();
         JSONObject config = JSONParser.parseLenient(cfg).isObject();
-        JSONNumber pst = config.get("preSelectTimeout").isNumber();
-        int timeout = Double.valueOf(pst.doubleValue()).intValue();
+        JSONString pst = config.get("preSelectTimeout").isString();
+        int timeout = Integer.valueOf(pst.stringValue());
         if (timeout > 0) {
             preSelectTimeout = timeout;
         }

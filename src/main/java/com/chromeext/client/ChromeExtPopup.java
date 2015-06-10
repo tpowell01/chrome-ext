@@ -1,7 +1,11 @@
 package com.chromeext.client;
 
+import com.chromeext.client.events.APICallEndEvent;
+import com.chromeext.client.events.APICallEndHandler;
 import com.chromeext.client.events.APICallEvent;
 import com.chromeext.client.events.APICallHandler;
+import com.chromeext.client.events.APICallStartEvent;
+import com.chromeext.client.events.APICallStartHandler;
 import com.chromeext.client.events.ChangeModeEvent;
 import com.chromeext.client.events.ChangeModeHandler;
 import com.chromeext.client.forms.ContextErrorForm;
@@ -67,7 +71,8 @@ public class ChromeExtPopup extends DialogBox {
 
 
         imgLoader = new Image(((ExtImageBundle) GWT.create(ExtImageBundle.class)).getLoadingIcon().getSafeUri());
-        imgLoader.setHeight("15px");
+        imgLoader.setHeight("12px");
+        imgLoader.setVisible(false);
 
         captionPanel.add(title);
         captionPanel.add(imgLoader);
@@ -93,6 +98,20 @@ public class ChromeExtPopup extends DialogBox {
                 } else {
                     fpContextContainer.add(new ContextStateForm(JSONParser.parseStrict(result.getResponse()).isObject()));
                 }
+            }
+        });
+
+        this.eventBus.addHandler(APICallStartEvent.TYPE, new APICallStartHandler() {
+            @Override
+            public void onAPICallStart() {
+                imgLoader.setVisible(true);
+            }
+        });
+
+        this.eventBus.addHandler(APICallEndEvent.TYPE, new APICallEndHandler() {
+            @Override
+            public void onAPICallEnd() {
+                imgLoader.setVisible(false);
             }
         });
 

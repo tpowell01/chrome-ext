@@ -1,6 +1,8 @@
 package com.chromeext.client.request;
 
+import com.chromeext.client.events.APICallEndEvent;
 import com.chromeext.client.events.APICallEvent;
+import com.chromeext.client.events.APICallStartEvent;
 import com.chromeext.client.model.CallResult;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestBuilder;
@@ -19,46 +21,102 @@ public class Communicator {
     private static String apiPassword;
     private static EventBus eventBus;
 
+    private static final String URI_PING = "/v3/ping";
     private static final String URI_STATE = "/v3/campaign-explorer/state";
     private static final String URI_PREDICATE = "/v3/campaign-explorer/predicate";
 
 
     public static void setupEnvironment(EventBus eventBus, String apiHost, String apiUser, String apiPassword) {
         Communicator.eventBus = eventBus;
-        Communicator.apiHost = apiHost;
+        //cut off trailing slash if it is at the end of the apiHost value
+        if (apiHost.endsWith("/")) {
+            Communicator.apiHost = apiHost.substring(0, apiHost.length() - 2);
+        } else {
+            Communicator.apiHost = apiHost;
+        }
+
         Communicator.apiUser = apiUser;
         Communicator.apiPassword = apiPassword;
     }
 
 
-    public static void getState() {
-
+    /**
+     * Utility method to make PING to the API server to check whether it working or not.
+     */
+    public static void pingAPIServer() {
         checkEnvironment();
+        fireAPICallStartEvent();
+
+        RequestBuilder rb = new RequestBuilder(RequestBuilder.GET, apiHost + URI_PING);
+        rb.setUser(apiUser);
+        rb.setPassword(apiPassword);
+
+        try {
+            rb.sendRequest(null, new RequestCallback() {
+                @Override
+                public void onResponseReceived(Request request, Response response) {
+                    if (response.getStatusCode() != 200) {
+                        fireErrorEvent("Seems API server is not available");
+                    }
+                    fireAPICallEndEvent();
+                }
+
+                @Override
+                public void onError(Request request, Throwable exception) {
+                    fireErrorEvent(exception.getMessage());
+                    fireAPICallEndEvent();
+                }
+            });
+        } catch (RequestException e) {
+            fireErrorEvent(e.getMessage());
+            fireAPICallEndEvent();
+        }
+    }
+
+    public static void getState() {
+        checkEnvironment();
+        fireAPICallStartEvent();
 
         try {
             RequestBuilder rb = new RequestBuilder(RequestBuilder.GET, apiHost + URI_STATE);
             rb.setUser(apiUser);
             rb.setPassword(apiPassword);
 
+
+
             rb.sendRequest(null, new RequestCallback() {
                 @Override
                 public void onResponseReceived(Request request, Response response)  {
                     int statusCode = response.getStatusCode();
                     if (statusCode != 200) {
-                        eventBus.fireEvent(new APICallEvent(new CallResult(true, response.getText())));
+                        fireErrorEvent(response.getText());
                     } else {
                         eventBus.fireEvent(new APICallEvent(new CallResult(response.getText())));
                     }
+                    fireAPICallEndEvent();
                 }
 
                 @Override
                 public void onError(Request request, Throwable exception) {
-                    eventBus.fireEvent(new APICallEvent(new CallResult(true, exception.getMessage())));
+                    fireErrorEvent(exception.getMessage());
+                    fireAPICallEndEvent();
                 }
             });
         } catch (RequestException e) {
-            eventBus.fireEvent(new APICallEvent(new CallResult(true, e.getMessage())));
+            fireErrorEvent(e.getMessage());
+            fireAPICallEndEvent();
         }
+    }
+
+    public static void postPredicate(Object... some) {
+        checkEnvironment();
+        fireAPICallStartEvent();
+
+        RequestBuilder rb = new RequestBuilder(RequestBuilder.POST, apiHost + URI_PREDICATE);
+        rb.setUser(apiUser);
+        rb.setPassword(apiPassword);
+        //todo: finish implementation
+        fireAPICallEndEvent();
     }
 
     /**
@@ -71,4 +129,21 @@ public class Communicator {
             throw new IllegalStateException("Not all required attributes set to successfully invoke API methods.");
         }
     }
+
+    private static void fireErrorEvent(String errorMessage) {
+        eventBus.fireEvent(new APICallEvent(new CallResult(true, errorMessage)));
+    }
+
+    private static void fireAPICallStartEvent() {
+        eventBus.fireEvent(new APICallStartEvent());
+    }
+
+    private static void fireAPICallEndEvent() {
+        eventBus.fireEvent(new APICallEndEvent());
+    }
+
+    private static native String btoa(String string)/*-{
+        return btoa(string);
+    }-*/;
+
 }
