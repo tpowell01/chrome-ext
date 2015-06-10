@@ -112,7 +112,7 @@ public class ChromeExt implements EntryPoint {
         };
 
         //for testing purposes...
-        showExtension(); //todo remove after testing
+//        showExtension(); //todo remove after testing
     }
 
     /**
@@ -127,6 +127,11 @@ public class ChromeExt implements EntryPoint {
 
         popup.show();
 
+        //in case this handler already was registered before in other tab(s) it is needed to be removed in order
+        //to not have more than one handler at a time
+        if (handlerRegistration != null) {
+            handlerRegistration.removeHandler();
+        }
         handlerRegistration = Event.addNativePreviewHandler(nativeEventPreviewHandler);
 
         //perform API server ping

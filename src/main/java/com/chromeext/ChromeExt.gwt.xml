@@ -35,6 +35,5 @@
 
     <collapse-all-properties/>
     <add-linker name="sso"/>
-    <!--<set-property name="user.agent" value="safari"/>-->
-    <!--<add-linker name="direct_install"/>-->
+    <set-property name="user.agent" value="safari"/>
 </module>

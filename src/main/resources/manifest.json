@@ -53,7 +53,8 @@
     "web_accessible_resources": [
         "chromeext/chromeext.nocache.js",
         "chromeext/gwt/*",
-        "src/custom/runner.js",
+        "src/custom/loader.js",
+        "src/custom/unloader.js",
         "chromeext/ChromeExt.css"
     ],
 

@@ -1,29 +1,39 @@
 chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
-    chrome.storage.sync.get("chromeExtOptions", function (items) {
-        if (!items.chromeExtOptions) {
-            //show alert that not all options are set for the plugin
-            alert("Please configure extension on Options page before using it.");
-        } else {
-            var ceo = items.chromeExtOptions;
-            if (!ceo.preSelectTimeout) {
-                ceo.preSelectTimeout = 1000;
-            }
 
-            if (!ceo.apiHost || !ceo.apiUser || !ceo.apiPassword) {
-                alert("Not all configuration options for extension are set.");
+    if (msg.text && msg.text == "load_extension") {
+        chrome.storage.sync.get("chromeExtOptions", function (items) {
+            if (!items.chromeExtOptions) {
+                //show alert that not all options are set for the plugin
+                alert("Please configure extension on Options page before using it.");
             } else {
-                var inp = document.createElement("input");
-                inp.type = "hidden";
+                var ceo = items.chromeExtOptions;
+                if (!ceo.preSelectTimeout) {
+                    ceo.preSelectTimeout = 1000;
+                }
 
-                inp.value = JSON.stringify(ceo);
+                if (!ceo.apiHost || !ceo.apiUser || !ceo.apiPassword) {
+                    alert("Not all configuration options for extension are set.");
+                } else {
+                    var inp = document.createElement("input");
+                    inp.type = "hidden";
 
-                inp.id = "gwtPreSelectTimeout";
-                document.body.appendChild(inp);
+                    inp.value = JSON.stringify(ceo);
 
-                _gwtExt_loadExtension(msg);
+                    inp.id = "gwtPreSelectTimeout";
+                    document.body.appendChild(inp);
+
+                    _gwtExt_loadExtension(msg);
+                }
             }
-        }
-    });
+        });
+    } else if (msg.text && msg.text == "unload_extension") {
+        var head = document.getElementsByTagName("head")[0];
+        var script2 = document.createElement("script");
+        script2.type = "text/javascript";
+        script2.src = chrome.runtime.getURL("src/custom/unloader.js");
+        head.appendChild(script2);
+    }
+
 
 });
 
@@ -55,9 +65,9 @@ function _gwtExt_loadExtension(msg) {
                 setTimeout(function () {
                     var script2 = document.createElement("script");
                     script2.type = "text/javascript";
-                    script2.src = chrome.runtime.getURL("src/custom/runner.js");
+                    script2.src = chrome.runtime.getURL("src/custom/loader.js");
                     head.appendChild(script2);
-                }, 1000);
+                }, 500);
             };
 
             script.src = gwtNocacheURL;
@@ -67,7 +77,7 @@ function _gwtExt_loadExtension(msg) {
             var head = document.getElementsByTagName("head")[0];
             var script2 = document.createElement("script");
             script2.type = "text/javascript";
-            script2.src = chrome.runtime.getURL("src/custom/runner.js");
+            script2.src = chrome.runtime.getURL("src/custom/loader.js");
             head.appendChild(script2);
         }
     }

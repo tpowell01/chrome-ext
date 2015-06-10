@@ -50,6 +50,7 @@ public class Communicator {
         RequestBuilder rb = new RequestBuilder(RequestBuilder.GET, apiHost + URI_PING);
         rb.setUser(apiUser);
         rb.setPassword(apiPassword);
+        rb.setTimeoutMillis(10000);
 
         try {
             rb.sendRequest(null, new RequestCallback() {
