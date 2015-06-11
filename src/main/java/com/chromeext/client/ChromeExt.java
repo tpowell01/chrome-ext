@@ -7,10 +7,11 @@ import com.chromeext.client.model.TargetType;
 import com.chromeext.client.request.Communicator;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.EventTarget;
+import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONString;
@@ -28,7 +29,7 @@ public class ChromeExt implements EntryPoint {
     private static ChromeExtPopup popup;
 
     //timer which performs element pre-selection when executed
-    private Timer captureTimer;
+    private static Timer captureTimer;
 
     //current mode (or status) of the extension
     private static Mode currentMode = Mode.UNSELECTED;
@@ -48,6 +49,10 @@ public class ChromeExt implements EntryPoint {
     private static String apiHost;
     private static String apiUser;
     private static String apiPassword;
+
+    //message bus to receive messages from withing extension code (dirty hack!)
+    private static InputElement messageBus;
+    private static Timer messageReceiverTimer;
 
     /**
      * This is the entry point method.
@@ -111,6 +116,11 @@ public class ChromeExt implements EntryPoint {
             }
         };
 
+        //init receiving message bus
+        messageBus = Document.get().createHiddenInputElement();
+        messageBus.setId("ext2GWTMessageBus");
+        Document.get().getBody().appendChild(messageBus);
+
         //for testing purposes...
 //        showExtension(); //todo remove after testing
     }
@@ -119,6 +129,37 @@ public class ChromeExt implements EntryPoint {
      * This method exposed to javascript to open extension's popup on target page
      */
     public static void showExtension() {
+        //start interval for reading messages from inside the extension code
+        if (messageReceiverTimer == null) {
+            messageReceiverTimer = new Timer() {
+                @Override
+                public void run() {
+                    String value = messageBus.getValue();
+                    if (value != null && !value.isEmpty()) {
+                        messageBus.setValue("");
+                        JSONObject jsonValue = (JSONObject) JSONParser.parseLenient(value);
+                        String requestType = jsonValue.get("requestType").isString().stringValue();
+                        switch (requestType) {
+                            case "STATE":
+                                Communicator.parseGetStateResponse(jsonValue);
+                                break;
+                            case "PREDICATE":
+                                //todo: invoke Communicator to parse predicate response
+                                break;
+                            default:
+                                //todo: handle error response
+                                break;
+                        }
+                    }
+                }
+            };
+        }
+        messageReceiverTimer.cancel();
+        messageReceiverTimer.scheduleRepeating(100);
+
+
+
+
         //invoke extension configuration based on extension options set
         setupConfiguration();
 
@@ -155,6 +196,14 @@ public class ChromeExt implements EntryPoint {
      * This method exposed to javascript to close extension's popup by pressing extension's "browser action" button
      */
     public static void hideExtension() {
+        if (messageReceiverTimer != null) {
+            messageReceiverTimer.cancel();
+        }
+
+        if (captureTimer != null) {
+            captureTimer.cancel();
+        }
+
         currentMode = Mode.UNSELECTED;
         eventBus.fireEvent(new ChangeModeEvent(currentMode, new TargetModel(currentTarget,
                 TargetType.getByType(getTargetType(currentTarget)))));

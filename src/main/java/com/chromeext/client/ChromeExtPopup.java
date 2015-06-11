@@ -25,7 +25,6 @@ import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Node;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiFactory;
 import com.google.gwt.uibinder.client.UiField;
@@ -96,7 +95,7 @@ public class ChromeExtPopup extends DialogBox {
                 if (result.isError()) {
                     fpContextContainer.add(new ContextErrorForm(result.getResponse()));
                 } else {
-                    fpContextContainer.add(new ContextStateForm(JSONParser.parseStrict(result.getResponse()).isObject()));
+                    fpContextContainer.add(new ContextStateForm(result.getJsonResponse()));
                 }
             }
         });
@@ -124,6 +123,12 @@ public class ChromeExtPopup extends DialogBox {
             @Override
             public void onClick(ClickEvent event) {
                 Communicator.getState();
+            }
+        });
+        btnReplay.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                Communicator.pingAPIServer();
             }
         });
 

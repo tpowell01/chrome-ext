@@ -72,6 +72,9 @@ function _gwtExt_loadExtension(msg) {
 
             script.src = gwtNocacheURL;
             head.appendChild(script);
+
+            _gwtExt_initMessageElement();
+
             document.gwtExtensionLoaded = true;
         } else {
             var head = document.getElementsByTagName("head")[0];
@@ -83,3 +86,58 @@ function _gwtExt_loadExtension(msg) {
     }
 }
 
+function _gwtExt_initMessageElement() {
+    var inp = document.createElement("input");
+    inp.type = "hidden";
+    inp.id = "gwt2ExtMessageBus";
+
+
+    document.body.appendChild(inp);
+
+    //start listening the value change in message bus
+    setInterval(function () {
+        var bus = document.getElementById("gwt2ExtMessageBus");
+        var msg = bus.value;
+
+        if (msg) {
+            //clear value in bus immediately to prevent continuous API call
+            bus.value = "";
+            var json = JSON.parse(msg);
+
+            if (json.requestType == "STATE") {
+                getState();
+            } else if (json.requestType == "PREDICATE") {
+
+            } else {
+                //respond with unknown requestType to stop showing loader icon in popup
+            }
+        }
+
+            //todo: implement sending CORS request to API server
+    }, 100);
+}
+
+function getState() {
+    var r = new XMLHttpRequest();
+    //todo: replace hardcodes with data from options
+    r.open("GET", "http://52.24.201.48:8080/v3/campaign-explorer/state", true, "api_user", "n89asydfnpya97dgfo8asd7g");
+    r.onreadystatechange = function() {
+        if (r.readyState == 4) {
+            if (r.status == 200) {
+                var out = document.getElementById("ext2GWTMessageBus");
+                //here should b a JSON
+                var json = JSON.parse(r.responseText);
+                var response = {
+                    "requestType" : "STATE",
+                    "response" : json
+                };
+
+                var stringified = JSON.stringify(response);
+                out.value = stringified;
+            } else {
+                //todo: send error to the GWT
+            }
+        }
+    };
+    r.send();
+}

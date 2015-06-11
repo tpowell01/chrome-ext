@@ -4,11 +4,14 @@ import com.chromeext.client.events.APICallEndEvent;
 import com.chromeext.client.events.APICallEvent;
 import com.chromeext.client.events.APICallStartEvent;
 import com.chromeext.client.model.CallResult;
+import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.RequestException;
 import com.google.gwt.http.client.Response;
+import com.google.gwt.json.client.JSONObject;
 import com.google.web.bindery.event.shared.EventBus;
 
 /**
@@ -48,8 +51,8 @@ public class Communicator {
         fireAPICallStartEvent();
 
         RequestBuilder rb = new RequestBuilder(RequestBuilder.GET, apiHost + URI_PING);
-        rb.setUser(apiUser);
-        rb.setPassword(apiPassword);
+//        rb.setUser(apiUser);
+//        rb.setPassword(apiPassword);
         rb.setTimeoutMillis(10000);
 
         try {
@@ -78,35 +81,14 @@ public class Communicator {
         checkEnvironment();
         fireAPICallStartEvent();
 
-        try {
-            RequestBuilder rb = new RequestBuilder(RequestBuilder.GET, apiHost + URI_STATE);
-            rb.setUser(apiUser);
-            rb.setPassword(apiPassword);
+        InputElement outMessageBus = (InputElement) Document.get().getElementById("gwt2ExtMessageBus");
+        outMessageBus.setValue("{\"requestType\": \"STATE\"}");
+    }
 
-
-
-            rb.sendRequest(null, new RequestCallback() {
-                @Override
-                public void onResponseReceived(Request request, Response response)  {
-                    int statusCode = response.getStatusCode();
-                    if (statusCode != 200) {
-                        fireErrorEvent(response.getText());
-                    } else {
-                        eventBus.fireEvent(new APICallEvent(new CallResult(response.getText())));
-                    }
-                    fireAPICallEndEvent();
-                }
-
-                @Override
-                public void onError(Request request, Throwable exception) {
-                    fireErrorEvent(exception.getMessage());
-                    fireAPICallEndEvent();
-                }
-            });
-        } catch (RequestException e) {
-            fireErrorEvent(e.getMessage());
-            fireAPICallEndEvent();
-        }
+    public static void parseGetStateResponse(JSONObject response) {
+        fireAPICallEndEvent();
+        JSONObject stateResponse = response.get("response").isObject();
+        eventBus.fireEvent(new APICallEvent(new CallResult(stateResponse)));
     }
 
     public static void postPredicate(Object... some) {

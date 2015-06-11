@@ -31,6 +31,10 @@
     <div>
         Go to <a href="SecondTestPage.html">SecondTestPage.html</a> to test extension.
     </div>
+    <div>
+        <button onclick="getPingJS()">Make CORS PING</button>
+        <button onclick="getStateJS()">Make CORS STATE</button>
+    </div>
 </body>
 
 
@@ -38,6 +42,30 @@
 <!--TODO: IMPORTANT! JS code below contains credentials for the test environment. should be removed after testing-->
 <script type="text/javascript">
     document.chromeExtOptions = "{preSelectTimeout: \"2000\",apiHost: \"http://52.24.201.48:8080\",apiUser: \"api_user\",apiPassword: \"n89asydfnpya97dgfo8asd7g\"}";
+</script>
+
+<script type="text/javascript">
+    function getPingJS() {
+        var r = new XMLHttpRequest();
+        r.open("GET", "http://52.24.201.48:8080/v3/ping", true);
+        r.onreadystatechange = function() {
+            if (r.readyState == 4 && r.status == 200) {
+                console.log(r.responseText);
+            }
+        }
+        r.send();
+    }
+    function getStateJS() {
+        var r = new XMLHttpRequest();
+        r.open("GET", "http://52.24.201.48:8080/v3/campaign-explorer/state", false, "api_user", "n89asydfnpya97dgfo8asd7g");
+        r.onreadystatechange = function() {
+            if (r.readyState == 4 && r.status == 200) {
+                console.log(r.responseText);
+            }
+        }
+        r.send();
+    }
+
 </script>
 
 </html>
