@@ -42,8 +42,8 @@
         "tabs",
         "activeTab",
         "geolocation",
-        "https://*/*",
-        "http://*/*"
+        "https://*/",
+        "http://*/"
     ],
     "omnibox": {
         "keyword": "extensionizr"
